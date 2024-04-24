@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cleric Assessment [Intellext]</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
+            padding: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        h2 {
+            color: #333;
+            margin: 0 0 20px 0; /* Removed bottom margin for alignment */
+            text-align: center; /* Center the title */
+        }
+        form {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center form contents */
+        }
+        .input-group {
+            width: 100%; /* Added width to the input group */
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        input[type="text"], input[type="url"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 5px; /* Reduced margin to place the button closer */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px; /* Add margin for spacing */
+            border: none;
+            background-color: #5c67f2;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        button:hover {
+            background-color: #5049cc;
+        }
+        .add-button {
+            background-color: #50c878;
+        }
+        .add-button:hover {
+            background-color: #3da35d;
+        }
+        .remove-button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 5px; /* Add margin to separate from the input box */
+        }
+        .remove-button:hover {
+            background-color: #d32f2f;
+        }
+        #facts-container {
+           margin-top: 20px;
+           padding: 20px;
+           background: #fff;
+           box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+           border-radius: 8px;
+           width: 500px;
+           text-align: left; /* Align text to the left */
+       }
+       .fact-list {
+           list-style-type: disc; /* Add bullet points */
+           padding-left: 20px; /* Indent the list */
+       }
+    </style>
+</head>
+<body>
+    <h2>Cleric: Textelligent Bot</h2>
+    <form id="question-form" action="/" method="post">
+        <div class="input-group">
+            <label for="question">Question:</label>
+            <input type="text" id="question" name="question" placeholder="What design decisions did the team make?" required>
+        </div>
+        <div id="link-fields">
+            <div class="input-group">
+                <label for="link">Link:</label>
+                <input type="url" id="link" name="links[]" required>
+                <button type="button" class="remove-button" onclick="removeLinkField(this)">Remove</button>
+            </div>
+        </div>
+        <button type="button" onclick="addLinkField()" class="add-button">+ Add another link</button>
+        <button type="submit">Submit</button>
+    </form>
+    <div id="facts-container" style="display:none;"></div> <!-- Facts container -->
+    <script>
+        function addLinkField() {
+            const container = document.getElementById('link-fields');
+            const newField = document.createElement('div');
+            newField.className = 'input-group';
+            newField.innerHTML = `
+                <label for="link">Link:</label>
+                <input type="url" name="links[]" required>
+                <button type="button" class="remove-button" onclick="removeLinkField(this)">Remove</button>
+            `;
+            container.appendChild(newField);
+        }
+ 
+        function removeLinkField(element) {
+            const container = document.getElementById('link-fields');
+            container.removeChild(element.parentElement);
+        }
+
+
+
+        document.getElementById('question-form').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            const formData = new FormData(this);
+            const searchParams = new URLSearchParams();
+            
+            for (const pair of formData) {
+                searchParams.append(pair[0], pair[1]);
+            }
+
+            fetch('/', {
+                method: 'POST',
+                body: searchParams,
+            })
+            .then(response => response.json()) // Parsing JSON instead of text
+            .then(data => {
+                // Check if the response is already a parsed object
+                if (typeof data === 'string' || data instanceof String) {
+                    data = JSON.parse(data); // Parse the JSON string if needed
+                }
+                // Now data is a parsed JSON object
+                const factsContainer = document.getElementById('facts-container');
+                factsContainer.innerHTML = ''; // Clear previous content
+                const ul = document.createElement('ul'); // Create a list element
+                ul.className = 'fact-list';
+                if (data.facts && data.facts.length) {
+                    data.facts.forEach((fact) => {
+                        const li = document.createElement('li');
+                        li.textContent = fact;
+                        ul.appendChild(li); // Append each fact as a list item
+                    });
+                    factsContainer.appendChild(ul); // Append the list to the container
+                } else {
+                    factsContainer.textContent = 'No facts available.';
+                }
+                factsContainer.style.display = 'block'; // Make the facts container visible
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const factsContainer = document.getElementById('facts-container');
+                factsContainer.innerHTML = 'Error loading facts.';
+                factsContainer.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
