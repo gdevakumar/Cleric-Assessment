@@ -3,9 +3,6 @@ import threading
 import time
 import requests
 import json
-import ast
-from pydantic import BaseModel
-from typing import List, Optional
 from utils import generate_facts, get_text_from_log
 
 
@@ -19,14 +16,13 @@ def index():
         question = request.form['question']
         # Collect all link inputs
         links = request.form.getlist('links[]')
-        # Here you could add your API interaction code
-        post_res = requests.post("https://cleric-1.onrender.com/submit_question_and_documents", json={"question": question, "documents":links})
+
+        post_res = requests.post("http://localhost:5000/submit_question_and_documents", json={"question": question, "documents":links})
         time.sleep(3)
         if post_res.status_code != 200:
             return "Unable to process your logs!"
-        get_res = requests.get("https://cleric-1.onrender.com/get_question_and_facts")
-        # print(get_res)
-        # print(get_res.text)
+        get_res = requests.get("http://localhost:5000/get_question_and_facts")
+
         if get_res.status_code == 200:
             return jsonify(get_res.text)
 
@@ -78,4 +74,4 @@ def get_question_and_facts():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
